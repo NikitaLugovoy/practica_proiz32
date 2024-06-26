@@ -1,10 +1,9 @@
-
 document.addEventListener('DOMContentLoaded', () => {
     const searchButton = document.querySelector('.search_sign');
     const searchInput = document.querySelector('.search');
     const containersDiv = document.querySelector('.containers');
     const searchEngineSelect = document.querySelector('.search_engine');
-    
+
     function decodeHtmlEntities(text) {
         return text.replace(/&#(\d+);/g, (match, dec) => {
             return String.fromCharCode(dec);
@@ -38,63 +37,118 @@ document.addEventListener('DOMContentLoaded', () => {
             containersDiv.innerHTML = `<h2 class="content_header">Ошибка при выполнении запроса: ${error.message}</h2>`;
         }
     }
-
+    
     async function searchYandexGPT(query) {
         
-    }
-
-    async function chatGPTCompletion(query) {
-        const apiKey = 'sk-proj-4c5ZGPgbQwRavQtmKmrAT3BlbkFJ1DcMgE2WEkEr9laUhnrO';
-        const url = 'https://api.openai.com/v1/chat/completions';
+        const url = "https://llm.api.cloud.yandex.net/foundationModels/v1/completion";
+        const apiKey = "AQVNxJ5bDf0YdFdVDl9ujKQQhi3T8tZqlN6MENI8";
 
         const headers = {
-            'Authorization': `Bearer ${apiKey}`,
-            'Content-Type': 'application/json'
+            "Content-Type": "application/json",
+            "Authorization": `Api-Key ${apiKey}`
         };
 
         const prompt = {
+            modelUri: "gpt://b1gca4u7tp73kpmj87no/yandexgpt-lite",
+            completionOptions: {
+                stream: false,
+                temperature: 0.6,
+                maxTokens: "50"
+            },
+            messages: [
+                { role: "system", text: "Ты ассистент программист." },
+                { role: "user", text: query }
+            ]
+        };
+
+        try {
+            const response = await axios.post(url, prompt, { headers });
+            const responseContent = response.data.response || 'Undefined';
+            containersDiv.innerHTML = `
+                <h2 class="content_header">Ответ от Yandex GPT :</h2>
+                <pre>${responseContent}</pre>
+            `;
+        } catch (error) {
+            containersDiv.innerHTML = `<h2 class="content_header">Ошибка при выполнении запроса: ${error.message}</h2>`;
+        }
+    }
+
+    async function chatGPTCompletion(query) {
+        const apiKey = 'sk-VfstGlrelAWTynLrNl6u1Hrd9kTxexIU';
+        const baseUrl = 'https://api.proxyapi.ru/openai/v1';
+
+        const data = {
             model: 'gpt-3.5-turbo',
             messages: [
-                { role: 'system', content: 'Ты ассистент программист.' },
                 { role: 'user', content: query }
             ]
         };
 
         try {
-            const response = await fetch(url, {
-                method: 'POST',
-                headers: headers,
-                body: JSON.stringify(prompt)
+            const response = await axios.post(`${baseUrl}/chat/completions`, data, {
+                headers: {
+                    'Authorization': `Bearer ${apiKey}`,
+                    'Content-Type': 'application/json'
+                }
             });
-            if (!response.ok) {
-                throw new Error(`HTTP error: ${response.status}`);
-            }
-            const data = await response.json();
+            const responseContent = response.data.choices[0].message.content || 'Undefined';
             containersDiv.innerHTML = `
-                <h2 class="content_header">ChatGPT Response:</h2>
-                <pre>${JSON.stringify(data, null, 2)}</pre>
+                <h2 class="content_header">Ответ от ChatGPT :</h2>
+                <pre>${responseContent}</pre>
             `;
         } catch (error) {
-            containersDiv.innerHTML = `<h2 class="content_header">Бесплатные попытки закончились, нужен новый ключ((( ${error.message}</h2>`;
+            containersDiv.innerHTML = `<h2 class="content_header">Ошибка при выполнении запроса: ${error.message}</h2>`;
         }
+    }
+
+    async function aimlAPI(query) {
+        const { OpenAI } = require("openai");
+        async function aimlAPI(query) {
+            const openai = new OpenAI({
+                apiKey: "e5aabe778d5c453a96f293c31900977f",
+                baseURL: "https://api.aimlapi.com/",
+            });
+        
+            try {
+                const chatCompletion = await openai.chat.completions.create({
+                    model: "mistralai/Mistral-7B-Instruct-v0.2",
+                    messages: [
+                        { role: "system", content: "You are a travel agent. Be descriptive and helpful" },
+                        { role: "user", content: query }
+                    ],
+                    temperature: 0.7,
+                    max_tokens: 128,
+                });
+                containersDiv.innerHTML = `
+                    <h2 class="content_header">Ответ от OpenAI ChatGPT :</h2>
+                    <pre>${chatCompletion.choices[0].message.content}</pre>
+                `;
+            } catch (error) {
+                containersDiv.innerHTML = `<h2 class="content_header">Ошибка при выполнении запроса: ${error.message}</h2>`;
+            }
+        }
+        
     }
 
     searchButton.addEventListener('click', async () => {
         const query = searchInput.value;
         const selectedEngine = searchEngineSelect.value;
-
+    
         if (query.trim() !== "") {
             containersDiv.innerHTML = `<h2 class="content_header">Загрузка...</h2>`;
-
+    
             if (selectedEngine === "wikipedia") {
                 await searchWikipedia(query);
             } else if (selectedEngine === "yandex_gpt") {
                 await searchYandexGPT(query);
             } else if (selectedEngine === "chat_gpt") {
                 await chatGPTCompletion(query);
+            } else if (selectedEngine === "aiml_api") {
+                await aimlAPI(query); 
             } else {
                 containersDiv.innerHTML = `<h2 class="content_header">Выбранный поисковый движок не поддерживается.</h2>`;
             }
         }
     });
+    
 });
