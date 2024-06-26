@@ -1,12 +1,9 @@
-const fetch = require('node-fetch'); // Assuming you're using node-fetch for fetching in Node.js
-
+const fetch = require('node-fetch'); 
 const searchQuery = 'Artificial intelligence';
 
 const apiUrl = `https://en.wikipedia.org/w/api.php?action=query&format=json&list=search&srsearch=${encodeURIComponent(searchQuery)}`;
 
-// Функция для декодирования HTML символов
 function decodeHtmlEntities(text) {
-  // HTML entity decoding regex
   return text.replace(/&#(\d+);/g, (match, dec) => {
     return String.fromCharCode(dec);
   }).replace(/&quot;/g, '"')
@@ -26,7 +23,6 @@ fetch(apiUrl)
   .then(data => {
     const firstArticle = data.query.search[0];
     if (firstArticle) {
-      // Очистка текста выдержки от HTML тегов и декодирование HTML символов
       const cleanedSnippet = decodeHtmlEntities(firstArticle.snippet.replace(/<[^>]+>/g, ''));
       console.log('Первая найденная статья:', firstArticle.title);
       console.log('Очищенный текст выдержки:', cleanedSnippet);

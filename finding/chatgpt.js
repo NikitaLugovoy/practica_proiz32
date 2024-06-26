@@ -1,17 +1,14 @@
 const axios = require('axios');
 
-// Установите API ключ
 const apiKey = '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';
 
-// Настройки прокси
 const proxyUrl = 'https://api.proxyapi.ru/openai/v1';
 
-// Функция для отправки запросов к API через прокси
 async function chatCompletion(messages) {
     const proxyAgent = axios.create({
         proxy: {
             host: proxyUrl,
-            port: 443, // Порт прокси (в данном случае HTTPS)
+            port: 443, 
         }
     });
 
@@ -40,12 +37,10 @@ async function chatCompletion(messages) {
             console.error('Произошла неизвестная ошибка:', error.message);
         }
 
-        // Здесь можно добавить код для предложения пользователю приобрести прокси
         console.log('Не хотите ли вы приобрести прокси для доступа к этому сервису?');
     }
 }
 
-// Пример использования функции
 const messages = [
     { role: 'system', content: 'You are a helpful assistant.' },
     { role: 'user', content: 'Hello! How can you help me today?' }
