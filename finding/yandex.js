@@ -1,4 +1,4 @@
-const fetch = require('node-fetch');
+const axios = require('axios');
 
 const prompt = {
     modelUri: "gpt://b1gca4u7tp73kpmj87no/yandexgpt-lite",
@@ -27,13 +27,10 @@ const headers = {
     "Authorization": `Api-Key ${apiKey}`
 };
 
-fetch(url, {
-    method: 'POST',
-    headers: headers,
-    body: JSON.stringify(prompt)
-})
-.then(response => response.json())
-.then(result => {
-    console.log(JSON.stringify(result, null, 2));
-})
-.catch(error => console.error('Error:', error));
+axios.post(url, prompt, { headers })
+    .then(response => {
+        console.log(JSON.stringify(response.data, null, 2));
+    })
+    .catch(error => {
+        console.error('Error:', error);
+    });
