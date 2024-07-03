@@ -16,8 +16,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     async function searchWikipedia(query) {
-        const apiUrl = `https://en.wikipedia.org/w/api.php?action=query&format=json&list=search&srsearch=${encodeURIComponent(query)}&origin=*`;
-
+        const apiUrl = `https://en.wikipedia.org/w/api.php?action=query&format=json&list=search&srsearch=${encodeURIComponent(query)}&origin=*&utf8=&srlimit=1`;
+    
         try {
             const response = await fetch(apiUrl);
             if (!response.ok) {
@@ -26,10 +26,21 @@ document.addEventListener('DOMContentLoaded', () => {
             const data = await response.json();
             const firstArticle = data.query.search[0];
             if (firstArticle) {
-                const cleanedSnippet = decodeHtmlEntities(firstArticle.snippet.replace(/<[^>]+>/g, ''));
+                const pageId = firstArticle.pageid;
+                const pageUrl = `https://en.wikipedia.org/?curid=${pageId}`;
+                const apiTextUrl = `https://en.wikipedia.org/w/api.php?action=query&format=json&prop=extracts&exsentences=2&explaintext=true&pageids=${pageId}&origin=*`;
+    
+                const responseText = await fetch(apiTextUrl);
+                if (!responseText.ok) {
+                    throw new Error(`HTTP error: ${responseText.status}`);
+                }
+                const dataText = await responseText.json();
+                const textExtract = dataText.query.pages[pageId].extract;
+    
                 containersDiv.innerHTML = `
                     <h2 class="content_header">Найденная статья: ${firstArticle.title}</h2>
-                    <p class="result">${cleanedSnippet}</p>
+                    <p class="result">${textExtract}</p>
+                    <a href="${pageUrl}" target="_blank" class="read_more">Читать больше на Wikipedia</a>
                 `;
             } else {
                 containersDiv.innerHTML = `<h2 class="content_header">Статьи не найдены.</h2>`;
@@ -38,6 +49,7 @@ document.addEventListener('DOMContentLoaded', () => {
             containersDiv.innerHTML = `<h2 class="content_header">Ошибка при выполнении запроса: ${error.message}</h2>`;
         }
     }
+    
 
     async function searchYandexGPT(query) {
         const prompt = {
@@ -50,7 +62,7 @@ document.addEventListener('DOMContentLoaded', () => {
             messages: [
                 {
                     role: "system",
-                    text: "Ты ассистент программист."
+                    text: "Ты ассистент профессор."
                 },
                 {
                     role: "user",
