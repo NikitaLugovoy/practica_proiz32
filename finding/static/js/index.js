@@ -1,9 +1,14 @@
-
     const searchButton = document.querySelector('.search_sign');
     const searchInput = document.querySelector('.search');
     const containersDiv = document.querySelector('.containers');
     const searchEngineSelect = document.querySelector('.search_engine');
     const contDiv = document.querySelector('.cont');
+    document.getElementById('action-select').addEventListener('change', function() {
+        var selectedValue = this.value;
+        if (selectedValue === 'login') {
+            window.location.href = "/";
+        }
+    });
 
     
 
@@ -37,6 +42,7 @@
             } else {
                 containersDiv.innerHTML = `<h2 class="content_header">Статьи не найдены.</h2>`;
             }
+            
         } catch (error) {
             containersDiv.innerHTML = `<h2 class="content_header">Ошибка при выполнении запроса: ${error.message}</h2>`;
         }
@@ -82,11 +88,6 @@
             containersDiv.innerHTML = `<h2 class="content_header">Ошибка при выполнении запроса: ${error.message}</h2>`;
         }
     }
-    
-    
-    
-    
-    
 
     async function chatGPTCompletion(query) {
         const apiKey = 'sk-VfstGlrelAWTynLrNl6u1Hrd9kTxexIU';

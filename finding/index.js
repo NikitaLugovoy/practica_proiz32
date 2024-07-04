@@ -31,6 +31,12 @@ let votesSchema = new mongoose.Schema({
     nickname: String,
     login: String,
     password: String,
+    request: String,
+    result: String,
+    comment: String,
+    like: Number,
+    dislike: Number,
+    source: String
 }, {
     versionKey: false
 });
@@ -50,7 +56,7 @@ app.post('/login', async (req, res) => {
     if (!vote) {
         res.send('Неверные учетные данные');
     } else {
-        res.redirect('index');
+        res.render('index', { vote: vote });
     }
 });
 
@@ -77,7 +83,11 @@ app.get('/index', async (req, res) => {
 });
 
 app.get('/history', async (req, res) => {
-    res.render('history');
+    let id = req.query.id;
+    let data = await Vote.find({
+        _id : id
+    });
+    res.render('history', {practica: data});
 });
 
 const yandexApiUrl = "https://llm.api.cloud.yandex.net/foundationModels/v1/completion";
@@ -93,6 +103,7 @@ app.post('/yandex-gpt', async (req, res) => {
         });
         console.log("Response from Yandex API:", response.data);
         res.json(response.data);
+        
     } catch (error) {
         console.error('Error making request to Yandex GPT:', error);
         if (error.response) {
