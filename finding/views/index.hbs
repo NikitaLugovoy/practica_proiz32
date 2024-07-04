@@ -1,0 +1,43 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="css/index.css">
+    <script src="https://kit.fontawesome.com/8087b4fcf8.js" crossorigin="anonymous"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orelega+One&display=swap" rel="stylesheet">
+    <title>Initial search</title>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="js/index.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/openai-js"></script>
+
+</head>
+<body>
+    <div class="container">
+        <ul class="nav">
+            <li><img src="azozz_ILf34 1.png" alt="" class="icon"></li>
+            <li><h1 class="header">Поиск</h1></li>
+            <li>
+                <a href="/history" class="history">История</a>
+                <button class="name">Nickname <i class="fa-solid fa-chevron-down"></i></button>
+            </li>
+        </ul>
+
+        
+        <div class="content">
+            <select class="search_engine">
+                <option  value="wikipedia"><img src="gas-kvas-com-p-vikipediya-logotip-na-prozrachnom-fone-22 1.png" alt="" class="icons"> Wikipedia</option>
+                <option value="yandex_gpt"><img src="gas-kvas-com-p-znachok-alisi-na-prozrachnom-fone-4.png" alt="" class="icons">Yandex GPT</option>
+                <option value="chat_gpt"><img src="openai-gym-Toolkit-algorithm-Reinforcement-Learning_-1024.webp" alt="" class="icons">Chat GPT</option>
+                <option value="aiml_api"><img src="mistralai.png" alt="" class="icons">MISTRAL AI</option>
+            </select>
+            <input type="text" placeholder="Введите запрос" class="search">
+            <button class="search_sign"><i class="fa-solid fa-magnifying-glass"></i></button>
+        </div>
+        <div class="cont" style="display: none;">
+            <div class="containers">
+            </div>
+        </div>
+    </div> 
+</body>
