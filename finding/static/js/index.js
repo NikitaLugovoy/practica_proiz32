@@ -1,19 +1,11 @@
-document.addEventListener('DOMContentLoaded', () => {
+
     const searchButton = document.querySelector('.search_sign');
     const searchInput = document.querySelector('.search');
     const containersDiv = document.querySelector('.containers');
     const searchEngineSelect = document.querySelector('.search_engine');
     const contDiv = document.querySelector('.cont');
 
-    function decodeHtmlEntities(text) {
-        return text.replace(/&#(\d+);/g, (match, dec) => {
-            return String.fromCharCode(dec);
-        }).replace(/&quot;/g, '"')
-          .replace(/&apos;/g, "'")
-          .replace(/&lt;/g, "<")
-          .replace(/&gt;/g, ">")
-          .replace(/&amp;/g, "&");
-    }
+    
 
     async function searchWikipedia(query) {
         const apiUrl = `https://en.wikipedia.org/w/api.php?action=query&format=json&list=search&srsearch=${encodeURIComponent(query)}&origin=*&utf8=&srlimit=1`;
@@ -179,4 +171,3 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     initializeSearch();
-});
