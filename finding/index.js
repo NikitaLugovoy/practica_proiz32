@@ -31,6 +31,7 @@ let votesSchema = new mongoose.Schema({
     nickname: String,
     login: String,
     password: String,
+    User_ID:String,
     request: String,
     result: String,
     source: String
@@ -95,13 +96,13 @@ app.get('/history', async (req, res) => {
 const yandexApiUrl = "https://llm.api.cloud.yandex.net/foundationModels/v1/completion";
 const yandexApiKey = "AQVNxJ5bDf0YdFdVDl9ujKQQhi3T8tZqlN6MENI8";
 
-// Сохранение данных в базу данных
-async function saveRequestToDatabase(request, result, source) {
+async function saveRequestToDatabase(request, result, source, User_ID) {
     try {
         let vote = new Vote({
             request: request,
             result: JSON.stringify(result),  // Преобразование объекта ответа в строку JSON
-            source: source
+            source: source,
+            User_ID: User_ID // Добавление User_ID в объект
         });
         await vote.save();
         console.log('Запись успешно сохранена в базе данных.');
@@ -113,6 +114,8 @@ async function saveRequestToDatabase(request, result, source) {
 
 app.post('/wikipedia', async (req, res) => {
     const query = req.body.query;
+    const User_ID = req.body.User_ID; // Получение User_ID из запроса
+
     const apiUrl = `https://en.wikipedia.org/w/api.php?action=query&format=json&list=search&srsearch=${encodeURIComponent(query)}&origin=*&utf8=&srlimit=1`;
 
     try {
@@ -129,8 +132,8 @@ app.post('/wikipedia', async (req, res) => {
             const textData = responseText.data;
             const textExtract = textData.query.pages[pageId].extract;
 
-            // Сохранение данных в базу данных
-            await saveRequestToDatabase(query, { ...data, textExtract }, 'Wikipedia');
+            // Сохранение данных в базу данных с User_ID
+            await saveRequestToDatabase(query, { ...data, textExtract }, 'Wikipedia', User_ID);
 
             res.json({
                 title: firstArticle.title,
@@ -146,8 +149,11 @@ app.post('/wikipedia', async (req, res) => {
     }
 });
 
+
 app.post('/yandex-gpt', async (req, res) => {
     try {
+        const User_ID = req.body.User_ID; // Получение User_ID из запроса
+
         const response = await axios.post(yandexApiUrl, req.body, {
             headers: {
                 "Content-Type": "application/json",
@@ -155,8 +161,8 @@ app.post('/yandex-gpt', async (req, res) => {
             }
         });
 
-        // Сохранение данных в базу данных
-        await saveRequestToDatabase(req.body.messages[1].text, response.data, 'Yandex GPT');
+        // Сохранение данных в базу данных с User_ID
+        await saveRequestToDatabase(req.body.messages[1].text, response.data, 'Yandex GPT', User_ID);
 
         console.log("Response from Yandex API:", response.data);
         res.json(response.data);
