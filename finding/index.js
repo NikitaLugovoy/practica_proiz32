@@ -178,11 +178,21 @@ app.post('/yandex-gpt', async (req, res) => {
     }
 });
 
-const aimlApiUrl = "https://api.aimlapi.com/chat/completions";
-const aimlApiKey = "e5aabe778d5c453a96f293c31900977f";
 
+app.post('/your/server/route', (req, res) => {
+    const userId = req.body.User_ID;
+    console.log('Received userId:', userId);
+    // Дальнейшая обработка переменной userId
+    req.userId = userId;
+
+});
+
+
+const aimlApiUrl = "https://api.aimlapi.com/chat/completions";
+const aimlApiKey = "e9ba996088ed486fb21e4b7bcf335063";
 app.post('/aiml-api', async (req, res) => {
     try {
+        const userId = req.body.User_ID; // Получение User_ID из запроса
         const response = await axios.post(aimlApiUrl, req.body, {
             headers: {
                 "Content-Type": "application/json",
@@ -191,11 +201,11 @@ app.post('/aiml-api', async (req, res) => {
         });
 
         // Сохранение данных в базу данных
-        await saveRequestToDatabase(req.body.messages[1].content, response.data, 'AIML API');
+        await saveRequestToDatabase(req.body.messages[1].content, response.data, 'AIML API', userId);
 
         console.log("Response from AIML API:", response.data);
         res.json(response.data);
-        
+
     } catch (error) {
         console.error('Error making request to AIML API:', error);
         if (error.response) {
@@ -207,11 +217,13 @@ app.post('/aiml-api', async (req, res) => {
     }
 });
 
+
 const chatGptUrl = "https://api.proxyapi.ru/openai/v1/chat/completions";
 const chatGptApiKey = "sk-VfstGlrelAWTynLrNl6u1Hrd9kTxexIU";
 
 app.post('/chatgpt', async (req, res) => {
     try {
+        const userId = req.headers['x-user-id']; // Получение User_ID из заголовка
         const response = await axios.post(chatGptUrl, req.body, {
             headers: {
                 "Content-Type": "application/json",
@@ -220,7 +232,7 @@ app.post('/chatgpt', async (req, res) => {
         });
 
         // Сохранение данных в базу данных
-        await saveRequestToDatabase(req.body.messages[0].content, response.data, 'ChatGPT');
+        await saveRequestToDatabase(req.body.messages[0].content, response.data, 'ChatGPT', userId);
 
         console.log("Response from ChatGPT:", response.data);
         res.json(response.data);
@@ -235,3 +247,4 @@ app.post('/chatgpt', async (req, res) => {
         res.status(500).send('Ошибка при выполнении запроса к ChatGPT');
     }
 });
+
