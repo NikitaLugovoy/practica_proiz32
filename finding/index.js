@@ -31,6 +31,9 @@ let votesSchema = new mongoose.Schema({
     nickname: String,
     login: String,
     password: String,
+    request: String,
+    result: String,
+    source: String
 }, {
     versionKey: false
 });
@@ -44,15 +47,20 @@ app.get('/', async (req, res) => {
 app.post('/login', async (req, res) => {
     let login = req.body.login;
     let password = req.body.password;
+    try {
+        let vote = await Vote.findOne({ login: login, password: password });
 
-    let vote = await Vote.findOne({ login: login, password: password });
-
-    if (!vote) {
-        res.send('Неверные учетные данные');
-    } else {
-        res.redirect('index');
+        if (!vote) {
+            res.send('Неверные учетные данные');
+        } else {
+            res.render('index', { vote: vote });
+        }
+    } catch (error) {
+        console.error('Ошибка при выполнении запроса к базе данных:', error);
+        res.status(500).send('Произошла ошибка при выполнении запроса к базе данных');
     }
 });
+
 
 app.get('/register', async (req, res) => {
     res.render('register');
@@ -77,11 +85,66 @@ app.get('/index', async (req, res) => {
 });
 
 app.get('/history', async (req, res) => {
-    res.render('history');
+    let id = req.query.id;
+    let data = await Vote.find({
+        _id : id
+    });
+    res.render('history', {practica: data});
 });
 
 const yandexApiUrl = "https://llm.api.cloud.yandex.net/foundationModels/v1/completion";
 const yandexApiKey = "AQVNxJ5bDf0YdFdVDl9ujKQQhi3T8tZqlN6MENI8";
+
+// Сохранение данных в базу данных
+async function saveRequestToDatabase(request, result, source) {
+    try {
+        let vote = new Vote({
+            request: request,
+            result: JSON.stringify(result),  // Преобразование объекта ответа в строку JSON
+            source: source
+        });
+        await vote.save();
+        console.log('Запись успешно сохранена в базе данных.');
+    } catch (error) {
+        console.error('Ошибка при сохранении записи в базу данных:', error);
+        throw error;  // Можно выбросить ошибку для обработки в обработчиках маршрутов
+    }
+}
+
+app.post('/wikipedia', async (req, res) => {
+    const query = req.body.query;
+    const apiUrl = `https://en.wikipedia.org/w/api.php?action=query&format=json&list=search&srsearch=${encodeURIComponent(query)}&origin=*&utf8=&srlimit=1`;
+
+    try {
+        const response = await axios.get(apiUrl);
+        const data = response.data;
+        const firstArticle = data.query.search[0];
+
+        if (firstArticle) {
+            const pageId = firstArticle.pageid;
+            const pageUrl = `https://en.wikipedia.org/?curid=${pageId}`;
+            const apiTextUrl = `https://en.wikipedia.org/w/api.php?action=query&format=json&prop=extracts&exsentences=2&explaintext=true&pageids=${pageId}&origin=*`;
+
+            const responseText = await axios.get(apiTextUrl);
+            const textData = responseText.data;
+            const textExtract = textData.query.pages[pageId].extract;
+
+            // Сохранение данных в базу данных
+            await saveRequestToDatabase(query, { ...data, textExtract }, 'Wikipedia');
+
+            res.json({
+                title: firstArticle.title,
+                textExtract: textExtract,
+                pageUrl: pageUrl
+            });
+        } else {
+            res.status(404).send('Статьи не найдены.');
+        }
+    } catch (error) {
+        console.error('Error fetching Wikipedia data:', error);
+        res.status(500).send('Ошибка при выполнении запроса к Википедии');
+    }
+});
 
 app.post('/yandex-gpt', async (req, res) => {
     try {
@@ -91,8 +154,13 @@ app.post('/yandex-gpt', async (req, res) => {
                 "Authorization": `Api-Key ${yandexApiKey}`
             }
         });
+
+        // Сохранение данных в базу данных
+        await saveRequestToDatabase(req.body.messages[1].text, response.data, 'Yandex GPT');
+
         console.log("Response from Yandex API:", response.data);
         res.json(response.data);
+        
     } catch (error) {
         console.error('Error making request to Yandex GPT:', error);
         if (error.response) {
@@ -101,5 +169,63 @@ app.post('/yandex-gpt', async (req, res) => {
             console.error('Response headers:', error.response.headers);
         }
         res.status(500).send('Ошибка при выполнении запроса к Yandex GPT');
+    }
+});
+
+const aimlApiUrl = "https://api.aimlapi.com/chat/completions";
+const aimlApiKey = "e5aabe778d5c453a96f293c31900977f";
+
+app.post('/aiml-api', async (req, res) => {
+    try {
+        const response = await axios.post(aimlApiUrl, req.body, {
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${aimlApiKey}`
+            }
+        });
+
+        // Сохранение данных в базу данных
+        await saveRequestToDatabase(req.body.messages[1].content, response.data, 'AIML API');
+
+        console.log("Response from AIML API:", response.data);
+        res.json(response.data);
+        
+    } catch (error) {
+        console.error('Error making request to AIML API:', error);
+        if (error.response) {
+            console.error('Response data:', error.response.data);
+            console.error('Response status:', error.response.status);
+            console.error('Response headers:', error.response.headers);
+        }
+        res.status(500).send('Ошибка при выполнении запроса к AIML API');
+    }
+});
+
+const chatGptUrl = "https://api.proxyapi.ru/openai/v1/chat/completions";
+const chatGptApiKey = "sk-VfstGlrelAWTynLrNl6u1Hrd9kTxexIU";
+
+app.post('/chatgpt', async (req, res) => {
+    try {
+        const response = await axios.post(chatGptUrl, req.body, {
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${chatGptApiKey}`
+            }
+        });
+
+        // Сохранение данных в базу данных
+        await saveRequestToDatabase(req.body.messages[0].content, response.data, 'ChatGPT');
+
+        console.log("Response from ChatGPT:", response.data);
+        res.json(response.data);
+        
+    } catch (error) {
+        console.error('Error making request to ChatGPT:', error);
+        if (error.response) {
+            console.error('Response data:', error.response.data);
+            console.error('Response status:', error.response.status);
+            console.error('Response headers:', error.response.headers);
+        }
+        res.status(500).send('Ошибка при выполнении запроса к ChatGPT');
     }
 });
