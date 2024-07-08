@@ -31,13 +31,15 @@ let votesSchema = new mongoose.Schema({
     nickname: String,
     login: String,
     password: String,
-    User_ID:String,
+    User_ID: String,
     request: String,
     result: String,
-    source: String
+    source: String,
+    timestamp: { type: Date, default: Date.now }
 }, {
     versionKey: false
 });
+
 
 let Vote = mongoose.model('users', votesSchema);
 
@@ -86,11 +88,19 @@ app.get('/index', async (req, res) => {
 });
 
 app.get('/history', async (req, res) => {
-    let id = req.query.id;
-    let data = await Vote.find({
-        _id : id
-    });
-    res.render('history', {practica: data});
+    try {
+        let userId = req.query.id; // Assuming you pass the user ID as a query parameter
+        let data = await Vote.find({ User_ID: userId }).sort({ timestamp: -1 }).limit(15);
+
+        if (!data || data.length === 0) {
+            res.status(404).send('Нет данных для отображения.');
+        } else {
+            res.render('history', { practica: data });
+        }
+    } catch (error) {
+        console.error('Ошибка при выполнении запроса к базе данных:', error);
+        res.status(500).send('Произошла ошибка при выполнении запроса к базе данных');
+    }
 });
 
 const yandexApiUrl = "https://llm.api.cloud.yandex.net/foundationModels/v1/completion";
