@@ -91,41 +91,41 @@
     
     
     
+async function chatGPTCompletion(query) {
+    const apiKey = 'sk-VfstGlrelAWTynLrNl6u1Hrd9kTxexIU';
+    const baseUrl = 'https://api.proxyapi.ru/openai/v1';
+    const User_ID = document.getElementById('userId').value; 
 
-    async function chatGPTCompletion(query) {
-        const apiKey = 'sk-VfstGlrelAWTynLrNl6u1Hrd9kTxexIU';
-        const baseUrl = 'https://api.proxyapi.ru/openai/v1';
+    const data = {
+        model: 'gpt-3.5-turbo',
+        messages: [
+            { role: 'user', content: query }
+        ]
+    };
 
-        const data = {
-            model: 'gpt-3.5-turbo',
-            messages: [
-                { role: 'user', content: query }
-            ],
-            
-        };
-
-        try {
-            const response = await axios.post(`${baseUrl}/chat/completions`, data, {
-                headers: {
-                    'Authorization': `Bearer ${apiKey}`,
-                    'Content-Type': 'application/json'
-                }
-            });
-            const responseContent = response.data.choices[0].message.content || 'Undefined';
-            containersDiv.innerHTML = `
-                <h2 class="content_header">Ответ от ChatGPT :</h2>
-                <pre>${responseContent}</pre>
-            `;
-        } catch (error) {
-            containersDiv.innerHTML = `<h2 class="content_header">Ошибка при выполнении запроса: ${error.message}</h2>`;
-        }
+    try {
+        const response = await axios.post('/chatgpt', data, {
+            headers: {
+                'Authorization': `Bearer ${apiKey}`,
+                'Content-Type': 'application/json',
+                'X-User-ID': User_ID // Custom header to pass User_ID
+            }
+        });
+        const responseContent = response.data.choices[0].message.content || 'Undefined';
+        containersDiv.innerHTML = `
+            <h2 class="content_header">Ответ от ChatGPT :</h2>
+            <pre>${responseContent}</pre>
+        `;
+    } catch (error) {
+        containersDiv.innerHTML = `<h2 class="content_header">Ошибка при выполнении запроса: ${error.message}</h2>`;
     }
+}
 
     async function aimlAPI(query) {
-        const apiKey = "e5aabe778d5c453a96f293c31900977f"; 
+        const apiKey = "e9ba996088ed486fb21e4b7bcf335063"; 
         const baseUrl = "https://api.aimlapi.com";
-        const User_ID = document.getElementById('userId').value; // Получение User_ID из скрытого поля
-
+        const User_ID = document.getElementById('userId').value; 
+    
         const data = {
             model: "mistralai/Mistral-7B-Instruct-v0.2",
             messages: [
@@ -134,11 +134,11 @@
             ],
             temperature: 0.7,
             max_tokens: 128,
-            User_ID: User_ID,// Включение User_ID в тело запроса
+            User_ID: User_ID 
         };
     
         try {
-            const response = await axios.post(`${baseUrl}/chat/completions`, data, {
+            const response = await axios.post('/aiml-api', data, {
                 headers: {
                     'Authorization': `Bearer ${apiKey}`,
                     'Content-Type': 'application/json'
@@ -153,6 +153,7 @@
             containersDiv.innerHTML = `<h2 class="content_header">Ошибка при выполнении запроса: ${error.message}</h2>`;
         }
     }
+    
     
     function initializeSearch() {
         searchButton.addEventListener('click', async () => {
