@@ -24,12 +24,14 @@
             }
     
             const data = await response.json();
+            const message = data.textExtract || 'Не удалось получить ответ от Wikipedia';
+    
             // Process response as needed
             if (data.title) {
                 const pageUrl = data.pageUrl;
                 containersDiv.innerHTML = `
                     <h2 class="content_header">Найденная статья: ${data.title}</h2>
-                    <p class="result">${data.textExtract}</p>
+                    <p class="result">${message}</p>
                     <a href="${pageUrl}" target="_blank" class="read_more">Читать больше на Wikipedia</a>
                 `;
             } else {
@@ -41,49 +43,51 @@
         }
     }
     
+    
 
     async function searchYandexGPT(query) {
-    const User_ID = document.getElementById('userId').value; // Получение User_ID из скрытого поля
-
-    const prompt = {
-        modelUri: "gpt://b1gca4u7tp73kpmj87no/yandexgpt-lite",
-        completionOptions: {
-            stream: false,
-            temperature: 0.6,
-            maxTokens: "200"
-        },
-        messages: [
-            {
-                role: "system",
-                text: "Ты ассистент профессор."
+        const User_ID = document.getElementById('userId').value; // Получение User_ID из скрытого поля
+    
+        const prompt = {
+            modelUri: "gpt://b1gca4u7tp73kpmj87no/yandexgpt-lite",
+            completionOptions: {
+                stream: false,
+                temperature: 0.6,
+                maxTokens: "200"
             },
-            {
-                role: "user",
-                text: query
-            }
-        ],
-        User_ID: User_ID // Включение User_ID в тело запроса
-    };
-
-    try {
-        const response = await axios.post('http://localhost:3005/yandex-gpt', prompt, {
-            headers: {
-                "Content-Type": "application/json"
-            }
-        });
-        const responseData = response.data;
-        console.log("Получен ответ от Yandex API:", responseData);
-
-        const responseContent = responseData.result.alternatives[0]?.message.text || 'Не удалось получить ответ от Yandex GPT';
-        containersDiv.innerHTML = `
-            <h2 class="content_header">Ответ от Yandex GPT :</h2>
-            <pre>${responseContent}</pre>
-        `;
-    } catch (error) {
-        console.error('Error:', error);
-        containersDiv.innerHTML = `<h2 class="content_header">Ошибка при выполнении запроса: ${error.message}</h2>`;
+            messages: [
+                {
+                    role: "system",
+                    text: "Ты ассистент профессор."
+                },
+                {
+                    role: "user",
+                    text: query
+                }
+            ],
+            User_ID: User_ID // Включение User_ID в тело запроса
+        };
+    
+        try {
+            const response = await axios.post('http://localhost:3005/yandex-gpt', prompt, {
+                headers: {
+                    "Content-Type": "application/json"
+                }
+            });
+            const responseData = response.data;
+            console.log("Получен ответ от Yandex API:", responseData);
+    
+            const responseContent = responseData.result.alternatives[0]?.message.text || 'Не удалось получить ответ от Yandex GPT';
+            containersDiv.innerHTML = `
+                <h2 class="content_header">Ответ от Yandex GPT :</h2>
+                <pre>${responseContent}</pre>
+            `;
+        } catch (error) {
+            console.error('Error:', error);
+            containersDiv.innerHTML = `<h2 class="content_header">Ошибка при выполнении запроса: ${error.message}</h2>`;
+        }
     }
-}
+    
     
 async function chatGPTCompletion(query) {
     const apiKey = 'sk-VfstGlrelAWTynLrNl6u1Hrd9kTxexIU';
@@ -115,38 +119,40 @@ async function chatGPTCompletion(query) {
     }
 }
 
-    async function aimlAPI(query) {
-        const apiKey = "e9ba996088ed486fb21e4b7bcf335063"; 
-        const baseUrl = "https://api.aimlapi.com";
-        const User_ID = document.getElementById('userId').value; 
-    
-        const data = {
-            model: "mistralai/Mistral-7B-Instruct-v0.2",
-            messages: [
-                { role: "system", content: "Вы умный профессор. Будьте описательны и полезны" },
-                { role: "user", content: query }
-            ],
-            temperature: 0.7,
-            max_tokens: 128,
-            User_ID: User_ID 
-        };
-    
-        try {
-            const response = await axios.post('/aiml-api', data, {
-                headers: {
-                    'Authorization': `Bearer ${apiKey}`,
-                    'Content-Type': 'application/json'
-                }
-            });
-            const responseContent = response.data.choices[0].message.content || 'Undefined';
-            containersDiv.innerHTML = `
-                <h2 class="content_header">Ответ от AIML API :</h2>
-                <pre>${responseContent}</pre>
-            `;
-        } catch (error) {
-            containersDiv.innerHTML = `<h2 class="content_header">Ошибка при выполнении запроса: ${error.message}</h2>`;
-        }
+
+async function aimlAPI(query) {
+    const apiKey = "e9ba996088ed486fb21e4b7bcf335063"; 
+    const baseUrl = "https://api.aimlapi.com";
+    const User_ID = document.getElementById('userId').value; 
+
+    const data = {
+        model: "mistralai/Mistral-7B-Instruct-v0.2",
+        messages: [
+            { role: "system", content: "Вы умный профессор. Будьте описательны и полезны" },
+            { role: "user", content: query }
+        ],
+        temperature: 0.7,
+        max_tokens: 128,
+        User_ID: User_ID 
+    };
+
+    try {
+        const response = await axios.post('/aiml-api', data, {
+            headers: {
+                'Authorization': `Bearer ${apiKey}`,
+                'Content-Type': 'application/json'
+            }
+        });
+        const responseContent = response.data.choices[0].message.content || 'Undefined';
+        containersDiv.innerHTML = `
+            <h2 class="content_header">Ответ от AIML API :</h2>
+            <pre>${responseContent}</pre>
+        `;
+    } catch (error) {
+        containersDiv.innerHTML = `<h2 class="content_header">Ошибка при выполнении запроса: ${error.message}</h2>`;
     }
+}
+
     
     function initializeSearch() {
         searchButton.addEventListener('click', async () => {

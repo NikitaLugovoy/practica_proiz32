@@ -108,9 +108,13 @@ const yandexApiKey = "AQVNxJ5bDf0YdFdVDl9ujKQQhi3T8tZqlN6MENI8";
 
 async function saveRequestToDatabase(request, result, source, User_ID) {
     try {
+        let message = result.choices && result.choices[0] && result.choices[0].message && result.choices[0].message.content 
+                    ? result.choices[0].message.content 
+                      : JSON.stringify(result);  // Default to full result if specific message content is not found
+
         let vote = new Vote({
             request: request,
-            result: JSON.stringify(result),  // Преобразование объекта ответа в строку JSON
+            result: message,  // Преобразование объекта ответа в строку JSON
             source: source,
             User_ID: User_ID // Добавление User_ID в объект
         });
@@ -121,6 +125,7 @@ async function saveRequestToDatabase(request, result, source, User_ID) {
         throw error;  // Можно выбросить ошибку для обработки в обработчиках маршрутов
     }
 }
+
 
 app.post('/wikipedia', async (req, res) => {
     const query = req.body.query;
