@@ -5,8 +5,6 @@
     const searchEngineSelect = document.querySelector('.search_engine');
     const contDiv = document.querySelector('.cont');
 
-    
-
     async function searchWikipedia(query) {
         const User_ID = document.getElementById('userId').value; // Assuming 'userId' is the ID of your input field for User_ID
     
@@ -86,10 +84,6 @@
         containersDiv.innerHTML = `<h2 class="content_header">Ошибка при выполнении запроса: ${error.message}</h2>`;
     }
 }
-
-    
-    
-    
     
 async function chatGPTCompletion(query) {
     const apiKey = 'sk-VfstGlrelAWTynLrNl6u1Hrd9kTxexIU';
@@ -153,7 +147,6 @@ async function chatGPTCompletion(query) {
             containersDiv.innerHTML = `<h2 class="content_header">Ошибка при выполнении запроса: ${error.message}</h2>`;
         }
     }
-    
     
     function initializeSearch() {
         searchButton.addEventListener('click', async () => {
