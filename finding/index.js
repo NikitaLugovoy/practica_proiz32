@@ -40,7 +40,6 @@ let votesSchema = new mongoose.Schema({
     versionKey: false
 });
 
-
 let Vote = mongoose.model('users', votesSchema);
 
 app.get('/', async (req, res) => {
@@ -63,7 +62,6 @@ app.post('/login', async (req, res) => {
         res.status(500).send('Произошла ошибка при выполнении запроса к базе данных');
     }
 });
-
 
 app.get('/register', async (req, res) => {
     res.render('register');
@@ -89,7 +87,7 @@ app.get('/index', async (req, res) => {
 
 app.get('/history', async (req, res) => {
     try {
-        let userId = req.query.id; // Assuming you pass the user ID as a query parameter
+        let userId = req.query.id; 
         let data = await Vote.find({ User_ID: userId }).sort({ timestamp: -1 }).limit(15);
 
         if (!data || data.length === 0) {
@@ -125,7 +123,6 @@ async function saveRequestToDatabase(request, result, source, User_ID) {
         throw error;  // Можно выбросить ошибку для обработки в обработчиках маршрутов
     }
 }
-
 
 app.post('/wikipedia', async (req, res) => {
     const query = req.body.query;
@@ -164,7 +161,6 @@ app.post('/wikipedia', async (req, res) => {
     }
 });
 
-
 app.post('/yandex-gpt', async (req, res) => {
     try {
         const User_ID = req.body.User_ID; // Получение User_ID из запроса
@@ -193,7 +189,6 @@ app.post('/yandex-gpt', async (req, res) => {
     }
 });
 
-
 app.post('/your/server/route', (req, res) => {
     const userId = req.body.User_ID;
     console.log('Received userId:', userId);
@@ -201,7 +196,6 @@ app.post('/your/server/route', (req, res) => {
     req.userId = userId;
 
 });
-
 
 const aimlApiUrl = "https://api.aimlapi.com/chat/completions";
 const aimlApiKey = "e9ba996088ed486fb21e4b7bcf335063";
@@ -232,7 +226,6 @@ app.post('/aiml-api', async (req, res) => {
     }
 });
 
-
 const chatGptUrl = "https://api.proxyapi.ru/openai/v1/chat/completions";
 const chatGptApiKey = "sk-VfstGlrelAWTynLrNl6u1Hrd9kTxexIU";
 
@@ -262,4 +255,3 @@ app.post('/chatgpt', async (req, res) => {
         res.status(500).send('Ошибка при выполнении запроса к ChatGPT');
     }
 });
-

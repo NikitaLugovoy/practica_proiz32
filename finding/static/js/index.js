@@ -1,4 +1,3 @@
-
     const searchButton = document.querySelector('.search_sign');
     const searchInput = document.querySelector('.search');
     const containersDiv = document.querySelector('.containers');
@@ -6,9 +5,8 @@
     const contDiv = document.querySelector('.cont');
 
     async function searchWikipedia(query) {
-        const User_ID = document.getElementById('userId').value; // Assuming 'userId' is the ID of your input field for User_ID
-    
-        const apiUrl = `http://localhost:3005/wikipedia`; // Update to match your backend route
+        const User_ID = document.getElementById('userId').value; 
+        const apiUrl = `http://localhost:3005/wikipedia`; 
     
         try {
             const response = await fetch(apiUrl, {
@@ -26,7 +24,6 @@
             const data = await response.json();
             const message = data.textExtract || 'Не удалось получить ответ от Wikipedia';
     
-            // Process response as needed
             if (data.title) {
                 const pageUrl = data.pageUrl;
                 containersDiv.innerHTML = `
@@ -43,8 +40,6 @@
         }
     }
     
-    
-
     async function searchYandexGPT(query) {
         const User_ID = document.getElementById('userId').value; // Получение User_ID из скрытого поля
     
@@ -88,7 +83,6 @@
         }
     }
     
-    
 async function chatGPTCompletion(query) {
     const apiKey = 'sk-VfstGlrelAWTynLrNl6u1Hrd9kTxexIU';
     const baseUrl = 'https://api.proxyapi.ru/openai/v1';
@@ -118,7 +112,6 @@ async function chatGPTCompletion(query) {
         containersDiv.innerHTML = `<h2 class="content_header">Ошибка при выполнении запроса: ${error.message}</h2>`;
     }
 }
-
 
 async function aimlAPI(query) {
     const apiKey = "e9ba996088ed486fb21e4b7bcf335063"; 
@@ -153,7 +146,6 @@ async function aimlAPI(query) {
     }
 }
 
-    
     function initializeSearch() {
         searchButton.addEventListener('click', async () => {
             const query = searchInput.value;
