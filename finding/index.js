@@ -54,7 +54,7 @@ app.post('/login', async (req, res) => {
         let vote = await Vote.findOne({ login: login, password: password });
 
         if (!vote) {
-            res.send('Неверные учетные данные');
+            res.render('login');
         } else {
             res.render('index', { vote: vote });
         }
