@@ -2,6 +2,9 @@
   {
     "nickname": "admin",
     "login": "asdf",
-    "password": "admin"
+    "password": "admin",
+    "request": "",
+    "result": "",
+    "source": ""
   }
 ]
