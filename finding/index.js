@@ -12,6 +12,7 @@ app.use(express.json());
 axios.defaults.headers.post['Content-Type'] = 'application/json';
 
 app.use(express.static('static'));
+
 app.use(cors({
     origin: 'http://localhost:3005', // Укажите домен, с которого разрешены запросы
     methods: ['GET', 'POST'], // Разрешенные методы
@@ -108,7 +109,7 @@ async function saveRequestToDatabase(request, result, source, User_ID) {
     try {
         let message = result.choices && result.choices[0] && result.choices[0].message && result.choices[0].message.content 
                     ? result.choices[0].message.content 
-                      : JSON.stringify(result);  // Default to full result if specific message content is not found
+                    : JSON.stringify(result);  
 
         let vote = new Vote({
             request: request,
